@@ -1,0 +1,68 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: url('images/bgloan.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #0c3593;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container Styling */
+.container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Heading */
+h1 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+/* Scanner Box */
+#reader {
+    width: 400px;
+    height: 300px;
+    margin: 20px auto;
+    border: none;  /* Remove border */
+    background: transparent !important; /* Ensure no background color */
+    box-shadow: none; /* Remove any shadow */
+}
+
+/* Scan Button */
+button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #218838;
+}
+
+/* Result Text */
+#result {
+    font-weight: bold;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#result.success {
+    color: #28a745;
+}
+
+#result.error {
+    color: #dc3545;
+}

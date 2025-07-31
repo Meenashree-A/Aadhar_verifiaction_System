@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Verification</title>
+    <link rel="stylesheet" href="static/fac.css">
+    <!-- <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { display: flex; flex-direction: column; align-items: center; }
+        .camera-box { border: 2px solid #ddd; padding: 10px; margin-bottom: 20px; }
+        button { padding: 10px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        #snapshot { margin-top: 20px; display: none; }
+        .instructions { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style> -->
+</head>
+<body>
+    <div class="container">
+        <h2>Secure Face Verification</h2>
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ul>
+                <li>Make sure your face is clearly visible</li>
+                <li>Look directly at the camera</li>
+                <li>Good lighting is important</li>
+                <li>Remove sunglasses or hats</li>
+            </ul>
+        </div>
+        <form id="verifyForm" method="POST" action="/verify_face">
+            <div class="form-group">
+                <label for="aadhaar_number">Aadhaar Number:</label>
+                <input type="text" id="aadhaar_number" name="aadhaar_number" required>
+            </div>
+            <div class="camera-box">
+                <video id="video" width="500" height="375" autoplay playsinline></video>
+                <canvas id="canvas" width="500" height="375" style="display:none;"></canvas>
+            </div>
+            <button type="button" id="captureBtn">📸 Capture Image</button>
+            <div id="snapshot">
+                <h3>Captured Image Preview:</h3>
+                <img id="snapshotImg" width="300">
+                <p id="faceDetectionFeedback" style="color: green; font-weight: bold;"></p>
+            </div>
+            <input type="hidden" name="live_image_data" id="live_image_data">
+            <button type="submit" id="verifyBtn" disabled>Verify Identity</button>
+        </form>
+    </div>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('captureBtn');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const snapshotImg = document.getElementById('snapshotImg');
+        const snapshotDiv = document.getElementById('snapshot');
+        const faceFeedback = document.getElementById('faceDetectionFeedback');
+        const input = document.getElementById('live_image_data');
+        let stream = null;
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user', focusMode: 'continuous' },
+                    audio: false
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                alert("Could not access the camera. Please enable camera permissions.");
+                console.error("Camera error:", err);
+            }
+        }
+
+        async function checkFaceDetection(imageData) {
+            try {
+                const response = await fetch('/detect_face', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.faceDetected;
+            } catch (error) {
+                console.error("Error in checkFaceDetection:", error);
+                return false;
+            }
+        }
+
+        captureBtn.addEventListener('click', async () => {
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/jpeg');
+
+            faceFeedback.textContent = "Checking for face...";
+            snapshotDiv.style.display = 'block';
+
+            const faceDetected = await checkFaceDetection(dataURL);
+
+            if (faceDetected) {
+                input.value = dataURL;
+                snapshotImg.src = dataURL;
+                faceFeedback.textContent = "✓ Face detected! Ready to verify.";
+                faceFeedback.style.color = "green";
+                verifyBtn.disabled = false;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            } else {
+                faceFeedback.textContent = "No face detected. Please try again.";
+                faceFeedback.style.color = "red";
+                verifyBtn.disabled = true;
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', startCamera);
+    </script>
+</body>
+</html>
