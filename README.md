@@ -1,5 +1,4 @@
 # Aadhar_verifiaction_System
-
 An Aadhaar Verification System using Python and AI that reads the QR code embedded in Aadhaar cards to extract and verify identity details, and optionally matches user identity via face recognition.
 
 Features
